@@ -1,4 +1,3 @@
-# urls.py
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
@@ -15,5 +14,5 @@ router.register(r'promo_codes', views.PromoCodeViewSet)
 router.register(r'levels', views.LevelViewSet)
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('', include(router.urls)),  # Это важно, чтобы маршруты работали
 ]

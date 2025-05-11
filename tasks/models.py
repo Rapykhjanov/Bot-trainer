@@ -1,11 +1,9 @@
 from django.db import models
 from django.utils import timezone
 
+
 class User(models.Model):
-    """
-    Модель пользователя.
-    """
-    user_id = models.AutoField(primary_key=True)  # Явное указание primary key
+    user_id = models.AutoField(primary_key=True)
     fio = models.CharField(max_length=255, verbose_name="ФИО")
     phone_number = models.CharField(max_length=20, verbose_name="Номер телефона")
     level = models.IntegerField(default=1, verbose_name="Уровень")
@@ -20,9 +18,6 @@ class User(models.Model):
 
 
 class Topic(models.Model):
-    """
-    Модель темы.
-    """
     topic_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=200, verbose_name="Название темы")
 
@@ -34,16 +29,28 @@ class Topic(models.Model):
         verbose_name_plural = "Темы"
 
 
+class Level(models.Model):
+    level_id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100, verbose_name="Название уровня")
+    required_points = models.IntegerField(verbose_name="Необходимое количество баллов")
+    description = models.TextField(verbose_name="Описание уровня")
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Уровень"
+        verbose_name_plural = "Уровни"
+
+
 class Question(models.Model):
-    """
-    Модель вопроса.
-    """
     question_id = models.AutoField(primary_key=True)
     text = models.TextField(verbose_name="Текст вопроса")
     image_url = models.URLField(null=True, blank=True, verbose_name="URL изображения")
     topic = models.ForeignKey(Topic, on_delete=models.CASCADE, verbose_name="Тема")
     difficulty = models.CharField(max_length=50, verbose_name="Сложность")
     subject = models.CharField(max_length=100, verbose_name="Предмет")
+    level = models.ForeignKey(Level, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Уровень сложности")
 
     def __str__(self):
         return f"Вопрос {self.question_id} ({self.topic})"
@@ -54,11 +61,8 @@ class Question(models.Model):
 
 
 class Answer(models.Model):
-    """
-    Модель ответа пользователя на вопрос.
-    """
     answer_id = models.AutoField(primary_key=True)
-    question = models.ForeignKey(Question, on_delete=models.CASCADE, verbose_name="Вопрос")
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, verbose_name="Вопрос", related_name="answer_set")
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Пользователь")
     text = models.CharField(max_length=255, verbose_name="Текст ответа")
     is_correct = models.BooleanField(default=False, verbose_name="Правильный ответ")
@@ -73,9 +77,6 @@ class Answer(models.Model):
 
 
 class Hint(models.Model):
-    """
-    Модель подсказки к вопросу.
-    """
     hint_id = models.AutoField(primary_key=True)
     question = models.ForeignKey(Question, on_delete=models.CASCADE, verbose_name="Вопрос")
     text = models.TextField(verbose_name="Текст подсказки")
@@ -90,9 +91,6 @@ class Hint(models.Model):
 
 
 class TestResult(models.Model):
-    """
-    Модель результата теста.
-    """
     test_result_id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Пользователь")
     start_time = models.DateTimeField(verbose_name="Время начала теста", default=timezone.now)
@@ -109,9 +107,6 @@ class TestResult(models.Model):
 
 
 class Subscription(models.Model):
-    """
-    Модель подписки пользователя.
-    """
     subscription_id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Пользователь")
     start_date = models.DateField(verbose_name="Дата начала подписки")
@@ -127,9 +122,6 @@ class Subscription(models.Model):
 
 
 class PromoCode(models.Model):
-    """
-    Модель промокода.
-    """
     promo_code_id = models.AutoField(primary_key=True)
     code = models.CharField(max_length=50, unique=True, verbose_name="Код")
     discount_type = models.CharField(max_length=100, verbose_name="Тип скидки")
@@ -142,20 +134,3 @@ class PromoCode(models.Model):
     class Meta:
         verbose_name = "Промокод"
         verbose_name_plural = "Промокоды"
-
-
-class Level(models.Model):
-    """
-    Модель уровня пользователя.
-    """
-    level_id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=100, verbose_name="Название уровня")
-    required_points = models.IntegerField(verbose_name="Необходимое количество баллов")
-    description = models.TextField(verbose_name="Описание уровня")
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        verbose_name = "Уровень"
-        verbose_name_plural = "Уровни"

@@ -1,4 +1,3 @@
-# serializers.py
 from rest_framework import serializers
 from .models import User, Question, Answer, Hint, TestResult, Subscription, PromoCode, Level, Topic
 
@@ -6,7 +5,7 @@ from .models import User, Question, Answer, Hint, TestResult, Subscription, Prom
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = '__all__'  # Или укажите конкретные поля
+        fields = '__all__'
 
 
 class TopicSerializer(serializers.ModelSerializer):
@@ -15,8 +14,16 @@ class TopicSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class LevelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Level
+        fields = '__all__'
+
+
 class QuestionSerializer(serializers.ModelSerializer):
-    topic = TopicSerializer(read_only=True)  # Для вложенного представления
+    topic = TopicSerializer(read_only=True)
+    level = LevelSerializer(read_only=True)
+
     class Meta:
         model = Question
         fields = '__all__'
@@ -52,7 +59,7 @@ class PromoCodeSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class LevelSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Level
-        fields = '__all__'
+class AnswerSubmitSerializer(serializers.Serializer):
+    user_id = serializers.IntegerField()
+    question_id = serializers.IntegerField()
+    answer_text = serializers.CharField(max_length=255)
