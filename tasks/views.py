@@ -2,9 +2,10 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.utils import timezone
-from .models import User, Question, Answer, Hint, TestResult, Subscription, PromoCode, Level, Topic
+from .models import User, Question, Answer, Hint, TestResult, Subscription, PromoCode, Level, Topic, Theory, TrainingSession
 from .serializers import UserSerializer, QuestionSerializer, AnswerSerializer, HintSerializer, TestResultSerializer, \
-    SubscriptionSerializer, PromoCodeSerializer, LevelSerializer, TopicSerializer, AnswerSubmitSerializer
+    SubscriptionSerializer, PromoCodeSerializer, LevelSerializer, TopicSerializer, AnswerSubmitSerializer, \
+    TheorySerializer, TrainingSessionSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -130,3 +131,37 @@ class SubscriptionViewSet(viewsets.ModelViewSet):
 class PromoCodeViewSet(viewsets.ModelViewSet):
     queryset = PromoCode.objects.all()
     serializer_class = PromoCodeSerializer
+
+
+class TheoryViewSet(viewsets.ModelViewSet):
+    queryset = Theory.objects.all()
+    serializer_class = TheorySerializer
+
+    @action(detail=True, methods=['get'])
+    def get_theory(self, request, pk=None):
+        theory = self.get_object()
+        serializer = TheorySerializer(theory)
+        return Response(serializer.data)
+
+
+class TrainingSessionViewSet(viewsets.ModelViewSet):
+    queryset = TrainingSession.objects.all()
+    serializer_class = TrainingSessionSerializer
+
+    @action(detail=True, methods=['get'])
+    def start_training(self, request, pk=None):
+        session = self.get_object()
+        # Логика для начала тренировки (например, определение сессии и заданий)
+        return Response({"message": f"Тренировка {session.id} начата!"}, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['post'])
+    def complete_training(self, request, pk=None):
+        session = self.get_object()
+        session.end_time = timezone.now()  # или другой логики завершения
+        session.save()
+        return Response({"message": f"Тренировка {session.id} завершена!"}, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['get'])
+    def return_to_main(self, request):
+        # Логика для возврата на главную страницу
+        return Response({"message": "Вы вернулись на главную страницу!"}, status=status.HTTP_200_OK)

@@ -113,6 +113,11 @@ class Subscription(models.Model):
     end_date = models.DateField(verbose_name="Дата окончания подписки")
     is_active = models.BooleanField(default=True, verbose_name="Активна")
 
+    def save(self, *args, **kwargs):
+        if self.end_date < timezone.now().date():
+            self.is_active = False
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"Подписка пользователя {self.user}"
 
@@ -134,3 +139,33 @@ class PromoCode(models.Model):
     class Meta:
         verbose_name = "Промокод"
         verbose_name_plural = "Промокоды"
+
+
+# 👇 Новая модель: Теория по темам
+class Theory(models.Model):
+    theory_id = models.AutoField(primary_key=True)
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE, verbose_name="Тема")
+    title = models.CharField(max_length=200, verbose_name="Заголовок")
+    content = models.TextField(verbose_name="Содержание теории")
+
+    def __str__(self):
+        return f"Теория по теме {self.topic.name}"
+
+    class Meta:
+        verbose_name = "Теория"
+        verbose_name_plural = "Теории"
+
+
+class TrainingSession(models.Model):
+    session_id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Пользователь")
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE, verbose_name="Тема")
+    start_time = models.DateTimeField(default=timezone.now, verbose_name="Время начала")
+    end_time = models.DateTimeField(null=True, blank=True, verbose_name="Время окончания")
+
+    def __str__(self):
+        return f"Сессия тренажёра {self.user.fio} - {self.topic.name}"
+
+    class Meta:
+        verbose_name = "Сессия тренажёра"
+        verbose_name_plural = "Сессии тренажёра"
