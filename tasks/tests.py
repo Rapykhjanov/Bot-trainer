@@ -2,9 +2,9 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.utils import timezone
-from .models import User, Question, Answer, Hint, TestResult, Subscription, PromoCode, Level, Topic, Theory, TrainingSession
+from .models import User, Question, Answer, Hint, TestResult, Subscription, Level, Topic, Theory, TrainingSession
 from .serializers import UserSerializer, QuestionSerializer, AnswerSerializer, HintSerializer, TestResultSerializer, \
-    SubscriptionSerializer, PromoCodeSerializer, LevelSerializer, TopicSerializer, AnswerSubmitSerializer, \
+    SubscriptionSerializer, LevelSerializer, TopicSerializer, AnswerSubmitSerializer, \
     TheorySerializer, TrainingSessionSerializer
 
 
@@ -103,34 +103,6 @@ class TestResultViewSet(viewsets.ModelViewSet):
         test_result.end_time = timezone.now()
         test_result.save()
         return Response({"message": "Результаты теста успешно отправлены!"}, status=status.HTTP_200_OK)
-
-
-class SubscriptionViewSet(viewsets.ModelViewSet):
-    queryset = Subscription.objects.all()
-    serializer_class = SubscriptionSerializer
-
-    @action(detail=False, methods=['post'])
-    def subscribe(self, request):
-        user_id = request.data.get('user_id')
-        start_date = request.data.get('start_date')
-        end_date = request.data.get('end_date')
-
-        user = User.objects.get(user_id=user_id)
-        subscription = Subscription.objects.create(user=user, start_date=start_date, end_date=end_date)
-        subscription.save()
-
-        return Response({"message": f"Подписка для пользователя {user.fio} активирована!"}, status=status.HTTP_201_CREATED)
-
-    @action(detail=False, methods=['get'])
-    def active_subscriptions(self, request):
-        active_subscriptions = Subscription.objects.filter(is_active=True)
-        serializer = SubscriptionSerializer(active_subscriptions, many=True)
-        return Response(serializer.data)
-
-
-class PromoCodeViewSet(viewsets.ModelViewSet):
-    queryset = PromoCode.objects.all()
-    serializer_class = PromoCodeSerializer
 
 
 class TheoryViewSet(viewsets.ModelViewSet):
